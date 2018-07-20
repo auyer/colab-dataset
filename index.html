@@ -1,12 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
-  <title>Page Title</title>
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
-  
+  <title>UCD ForSec DeepLearning Helper</title>
   <script LANGUAGE="JavaScript" type="text/javascript">
   var count = 0;
   var imagekey;
@@ -17,7 +12,6 @@
                 document.getElementById("imagedisplay").src = text;
                 });
             });
-        // document.getElementById("imagedisplay").src = data;
     }
     function vote(url,boolVote){
         count +=1; 
@@ -28,7 +22,6 @@
         headers: {
             'Accept': 'application/json, text/plain, */*',
             'Content-Type': 'application/json; charset=UTF-8'
-            // "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" // otherwise $_POST is empty
         },
         body: JSON.stringify(voteObj),
     }).then(function(response) {
@@ -36,12 +29,22 @@
                 console.log(text);
                 });
             });
-            document.getElementById("counter").innerHTML = "<strong>" + count.toString() + "</strong>";
-        // document.getElementById("imagedisplay").src = data;
+        document.getElementById("counter").innerHTML = "<strong>" + count.toString() + "</strong>";
+    }
+    function sleep(milliseconds) {
+        var start = new Date().getTime();
+        for (var i = 0; i < 1e7; i++) {
+            if ((new Date().getTime() - start) > milliseconds){
+            break;
+            }
+        }
     }
     function voteAndFetch(boolVote){
         vote('http://'+ location.hostname, boolVote)
+        sleep(50)
         GetAsync()
+        sleep(100)
+        return;
     }
     </script>
 </head>
@@ -155,6 +158,10 @@ document.addEventListener("keydown", function(event) {
     }
     return ;
 })
-
 </script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+
 </html>
