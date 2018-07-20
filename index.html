@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+  <title>Page Title</title>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+  
+  <script LANGUAGE="JavaScript" type="text/javascript">
+  var imagekey;
+    function GetAsync(){
+        fetch('http://'+ location.hostname + '/api/getkey/').then(function(response) {
+            response.text().then(function(text) {
+                imagekey = text;
+                document.getElementById("imagedisplay").src = text;
+                });
+            });
+        // document.getElementById("imagedisplay").src = data;
+    }
+    function vote(url,boolVote){
+        voteObj = {"key": imagekey, "vote": boolVote};
+        console.log(JSON.stringify(voteObj))
+        fetch(url + "/api/vote/", {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json; charset=UTF-8'
+            // "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" // otherwise $_POST is empty
+        },
+        body: JSON.stringify(voteObj),
+    }).then(function(response) {
+            response.text().then(function(text) {
+                console.log(text);
+                });
+            });
+        // document.getElementById("imagedisplay").src = data;
+    }
+    function voteAndFetch(boolVote){
+        vote('http://'+ location.hostname, boolVote)
+        GetAsync()
+    }
+    </script>
+</head>
+<body onload="GetAsync()">
+            <div id="page" class="container">
+                    <div class="navbar row">
+                        <div class="span6">
+                            <h1 class="muted">UCD ForSec Group</h1>
+                            <h2>Help us cassify Hotel Room pictures. If the picture shown is or not a photo of a Hotel Room.</h2>
+                            <h3>Instructions: Slide, Use the Keyboard Keys, or Click the buttons.</h3>
+                        </div>
+                  </div>
+                  <hr>
+                  <br>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-danger" onclick="voteAndFetch('false');" >&#8592;</button></h1><h1>&#215;</h1><h2 class="text-align text-center">NOT A ROOM</h2></div>
+                <div class="col-sm-10 col-md-8"><img class="text-align text-center" id="imagedisplay" style="text-align: center" src="" alt=""></div>
+                <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-success" onclick="voteAndFetch('true');">&#8594;</button></h1><h1>&#10003;</h1><h2 class="text-align text-center">IS A ROOM</h2></div>
+            </div>
+        </div>
+        
+        <footer class="page-footer font-small blue fixed-bottom">
+                <hr>
+            <div class="footer-copyright text-center py-3">Thank you for your help.</div>
+        </footer>
+    </div>
+<style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        /* Create three equal columns that floats next to each other */
+        .column {
+            float: left;
+            width: 33.33%;
+            padding: 10px;
+            height: 300px; /* Should be removed. Only for demonstration */
+        }
+        
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        
+        /* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+        @media screen and (max-width: 600px) {
+            .column {
+                width: 100%;
+            }
+        }
+</style>
+<script>
+    function swipedetect(el, callback){
+        var touchsurface = el,
+        swipedir,
+        startX,
+        startY,
+        distX,
+        distY,
+        threshold = 150, //required min distance traveled to be considered swipe
+        restraint = 100, // maximum distance allowed at the same time in perpendicular direction
+        allowedTime = 300, // maximum time allowed to travel that distance
+        elapsedTime,
+        startTime,
+        handleswipe = callback || function(swipedir){}
+
+        touchsurface.addEventListener('touchstart', function(e){
+            var touchobj = e.changedTouches[0]
+            swipedir = 'none'
+            dist = 0
+            startX = touchobj.pageX
+            startY = touchobj.pageY
+            startTime = new Date().getTime() // record time when finger first makes contact with surface
+            e.preventDefault()
+        }, false)
+
+        touchsurface.addEventListener('touchmove', function(e){
+            e.preventDefault() // prevent scrolling when inside DIV
+        }, false)
+
+        touchsurface.addEventListener('touchend', function(e){
+            var touchobj = e.changedTouches[0]
+            distX = touchobj.pageX - startX // get horizontal dist traveled by finger while in contact with surface
+            distY = touchobj.pageY - startY // get vertical dist traveled by finger while in contact with surface
+            elapsedTime = new Date().getTime() - startTime // get time elapsed
+            if (elapsedTime <= allowedTime){ // first condition for awipe met
+                if (Math.abs(distX) >= threshold && Math.abs(distY) <= restraint){ // 2nd condition for horizontal swipe met
+                    swipedir = (distX < 0)? 'left' : 'right' // if dist traveled is negative, it indicates left swipe
+                }
+                else if (Math.abs(distY) >= threshold && Math.abs(distX) <= restraint){ // 2nd condition for vertical swipe met
+                    swipedir = (distY < 0)? 'up' : 'down' // if dist traveled is negative, it indicates up swipe
+                }
+            }
+            handleswipe(swipedir)
+            e.preventDefault()
+        }, false)
+    }  
+
+window.addEventListener('load', function(){
+    var el = document.getElementById('page')
+    var inner = document.getElementById('page')
+    var hidetimer = null
+    swipedetect(el, function(swipedir){
+        if (swipedir == 'left'){
+            clearTimeout(hidetimer);
+            voteAndFetch("true");
+        } else if (swipedir == 'right'){
+            clearTimeout(hidetimer);
+            voteAndFetch("false");
+        }
+    })
+}, false)
+
+document.addEventListener("keydown", function(event) {
+    if(event.keyCode == 37){
+        console.log(event.which);
+        voteAndFetch("false");
+        return ;
+   }
+   if(event.keyCode == 39){
+        console.log(event.which);
+        voteAndFetch("true");
+                return ;
+    }
+    return ;
+})
+
+</script>
+</html>
