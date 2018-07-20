@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/dgraph-io/badger"
@@ -15,6 +16,11 @@ import (
 // DbPointer exported variable stores a pointer to the database initialized by the Init function.
 var DbPointer *badger.DB
 var DBSize int
+
+type Vote struct {
+	Key  string `json:"Key"`
+	Vote string `json:"Vote"`
+}
 
 // Init takes a path as input and reads / creates a bBadger database .
 func Init(databasePath string) error {
@@ -111,7 +117,6 @@ func GetRandomKey() (value string, err error) {
 				item := it.Item()
 				k := item.Key()
 				value = string(k)
-				fmt.Printf("key=%s\n", k)
 				return nil
 			} else {
 				acount += 1
@@ -138,8 +143,9 @@ func CountDBSize() (value int) {
 	return
 }
 
-func GetCurrentVotes() {
-	_ = DbPointer.View(func(txn *badger.Txn) error {
+func GetCurrentVotes() (list []Vote, err error) {
+	// list := make(chan struct {string; string})
+	err = DbPointer.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
 		it := txn.NewIterator(opts)
@@ -152,8 +158,9 @@ func GetCurrentVotes() {
 				return err
 			}
 			result, _ := binary.Varint(v)
-			fmt.Printf("key=%s, value=%d\n", k, result)
+			list = append(list, Vote{string(k), strconv.Itoa(int(result))})
 		}
 		return nil
 	})
+	return
 }

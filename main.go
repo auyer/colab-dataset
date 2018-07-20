@@ -1,23 +1,5 @@
-// Package main controls all features of the FastGate API Gateway.
-// FasGate API Gateway is an application that  built with the Golang language
-/*
-You can run FastGate with the following command:
-```
-    fastgate -config ./path_to_config_file
-```
-  A sample to the configuration file can be found in config.model.json
- To manually register (and test) FastGate, Send a POST request to `yourip:yourport/fastgate/` with a JSON like follows:
-```
-{
-  "address" : "https://yourEndpoint:8080"
-  "uri"     : "/api/your_resource"
-}
-```
-### Now send the desired request to `yourip:yourport/api/your_resource` and see it working !
-
-
-
-*/
+// Package main controls all features of the Voting Helper Web App and API.
+// colab-dataset is a simple website to help calssify images accordignly.
 package main
 
 import (
@@ -43,16 +25,8 @@ import (
 var confFlag = flag.String("config", "./config.json", "PATH to Configuration File. See docs for example config.")
 
 const (
-	version = "0.1.alpha"
-	website = "github.com/auyer/fastgate/"
-	banner  = "%s\nFast, light and Low Overhead API Gateway written in GO\n%s \nServing %s on port => %s"
-	// logo built with http://www.patorjk.com/software and https://www.browserling.com/tools/utf8-encode
+	banner = "Serving %s on port => %s"
 )
-
-type Vote struct {
-	Key  string `json:"Key"`
-	Vote string `json:"Vote"`
-}
 
 func staticBuilder(dir string) {
 	files, err := ioutil.ReadDir(dir)
@@ -63,12 +37,7 @@ func staticBuilder(dir string) {
 		if f.IsDir() {
 			staticBuilder(dir + "/" + f.Name())
 		} else {
-
 			_ = db.InsertResource(dir+"/"+f.Name(), 0)
-
-			// fmt.Println(f.Name())
-			// fmt.Println("TEST:")
-			// fmt.Println(db.GetResourceValue(dir + "/" + f.Name()))
 		}
 
 	}
@@ -88,9 +57,9 @@ func main() {
 	}
 	server.Debug, _ = strconv.ParseBool(config.ConfigParams.Debug)
 	if config.TLSEnabled {
-		log.Printf(banner, color.Red("v"+version), color.Blue(website), color.Green("HTTPS"), color.Green(config.ConfigParams.HttpsPort))
+		log.Printf(banner, color.Green("HTTPS"), color.Green(config.ConfigParams.HttpsPort))
 	} else {
-		log.Printf(banner, color.Red("v"+version), color.Blue(website), color.Red("HTTP"), color.Green(config.ConfigParams.HttpPort))
+		log.Printf(banner, color.Red("HTTP"), color.Green(config.ConfigParams.HttpPort))
 	}
 
 	server.Logger.SetOutput(config.LogFile)
@@ -119,7 +88,7 @@ func main() {
 	}))
 
 	server.POST("/api/vote/", func(c echo.Context) error {
-		var vote Vote
+		var vote db.Vote
 		err := c.Bind(&vote)
 		if err != nil {
 			server.Logger.Info(err)
@@ -134,7 +103,6 @@ func main() {
 			db.UpdateResource(vote.Key, -1)
 			return c.String(200, " ")
 		}
-
 		return c.String(500, " ")
 	})
 
@@ -150,14 +118,12 @@ func main() {
 	})
 
 	server.GET("/api/results/", func(c echo.Context) error {
-
-		db.GetCurrentVotes()
-		// value, err := db.GetCurrentVotes()
-		// if err != nil {
-		// 	server.Logger.Info(err.Error())
-		// 	return c.String(http.StatusNotFound, err.Error())
-		// }
-		return c.String(http.StatusAccepted, " ") //c.Request().Host+
+		value, err := db.GetCurrentVotes()
+		if err != nil {
+			server.Logger.Info(err.Error())
+			return c.String(http.StatusNotFound, err.Error())
+		}
+		return c.JSON(http.StatusAccepted, value) //c.Request().Host+
 	})
 
 	if config.TLSEnabled {
@@ -179,6 +145,7 @@ func main() {
 		}
 	} else {
 		go func() {
+			// if err := server.StartAutoTLS(config.ConfigParams.HttpPort); err != nil {
 			if err := server.Start(":" + config.ConfigParams.HttpPort); err != nil {
 				server.Logger.Info("shutting down the server")
 			}
