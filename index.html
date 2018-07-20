@@ -8,6 +8,7 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
   
   <script LANGUAGE="JavaScript" type="text/javascript">
+  var count = 0;
   var imagekey;
     function GetAsync(){
         fetch('http://'+ location.hostname + '/api/getkey/').then(function(response) {
@@ -19,6 +20,7 @@
         // document.getElementById("imagedisplay").src = data;
     }
     function vote(url,boolVote){
+        count +=1; 
         voteObj = {"key": imagekey, "vote": boolVote};
         console.log(JSON.stringify(voteObj))
         fetch(url + "/api/vote/", {
@@ -34,6 +36,7 @@
                 console.log(text);
                 });
             });
+            document.getElementById("counter").innerHTML = "<strong>" + count.toString() + "</strong>";
         // document.getElementById("imagedisplay").src = data;
     }
     function voteAndFetch(boolVote){
@@ -43,55 +46,39 @@
     </script>
 </head>
 <body onload="GetAsync()">
-            <div id="page" class="container">
-                    <div class="navbar row">
-                        <div class="span6">
-                            <h1 class="muted">UCD ForSec Group</h1>
-                            <h2>Help us cassify Hotel Room pictures. If the picture shown is or not a photo of a Hotel Room.</h2>
-                            <h3>Instructions: Slide, Use the Keyboard Keys, or Click the buttons.</h3>
-                        </div>
-                  </div>
-                  <hr>
-                  <br>
+    <div id="page" class="container">
+        <div class="navbar row" style="color: #7b818c; background-color:#7b818c">
+            <div>
+                <img src="./media/forseclogo.png" style="width: 12.5em; margin: 5px; margin-left: 20px" alt="UCD Forensics and Security Research Group Logo">
+                <!-- <h1>UCD ForSec Group</h1> -->
+            </div>
+            <div>
+                <p><font color="white">Help us cassify Hotel Room pictures. If the picture shown is or not a photo of a Hotel Room.</font></p>
+                <p><font color="white">Instructions: Slide, Use the Keyboard Keys, or Click the buttons.</font></p>
+            </div>
+                
+        </div>
+        <br>
         <div class="container">
             <div class="row">
-                <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-danger" onclick="voteAndFetch('false');" >&#8592;</button></h1><h1>&#215;</h1><h2 class="text-align text-center">NOT A ROOM</h2></div>
+                <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-danger" on-hold="on-tap="voteAndFetch('false');" on-tap="voteAndFetch('false');" on-touch="voteAndFetch('false');" onclick="voteAndFetch('false');" >&#8592;</button></h1><h1>&#215;</h1><h2 class="text-align text-center">NOT A ROOM</h2></div>
                 <div class="col-sm-10 col-md-8"><img class="text-align text-center" id="imagedisplay" style="text-align: center" src="" alt=""></div>
-                <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-success" onclick="voteAndFetch('true');">&#8594;</button></h1><h1>&#10003;</h1><h2 class="text-align text-center">IS A ROOM</h2></div>
+                <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-success" on-hold="on-tap="voteAndFetch('true');" on-tap="voteAndFetch('true');" on-touch="voteAndFetch('true');" onclick="voteAndFetch('true');">&#8594;</button></h1><h1>&#10003;</h1><h2 class="text-align text-center">IS A ROOM</h2></div>
             </div>
         </div>
-        
-        <footer class="page-footer font-small blue fixed-bottom">
-                <hr>
-            <div class="footer-copyright text-center py-3">Thank you for your help.</div>
+        <br>
+        <br>
+        <footer class="page-footer font-small blue fixed-bottom" >
+            <div class="footer-copyright text-center py-3" style="color: #7b818c; background-color:#7b818c" >
+                <font color="white">You calssified</font> <font color="lime" id="counter">0</font>
+                <font color="white"> images. &nbsp;&nbsp; Thank you for your help.</font>
+        </div>
         </footer>
     </div>
 <style>
-        * {
-            box-sizing: border-box;
-        }
-        
-        /* Create three equal columns that floats next to each other */
-        .column {
-            float: left;
-            width: 33.33%;
-            padding: 10px;
-            height: 300px; /* Should be removed. Only for demonstration */
-        }
-        
-        /* Clear floats after the columns */
-        .row:after {
-            content: "";
-            display: table;
-            clear: both;
-        }
-        
-        /* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
-        @media screen and (max-width: 600px) {
-            .column {
-                width: 100%;
-            }
-        }
+    .container img {
+        width: 100%;
+    }
 </style>
 <script>
     function swipedetect(el, callback){
