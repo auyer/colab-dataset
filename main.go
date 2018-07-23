@@ -105,6 +105,24 @@ func main() {
 		}
 		return c.String(500, " ")
 	})
+	server.POST("/api/unvote/", func(c echo.Context) error {
+		var vote db.Vote
+		err := c.Bind(&vote)
+		if err != nil {
+			server.Logger.Info(err)
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		if vote.Vote == "true" {
+			fmt.Print("Undoing POSITIVE VOTE")
+			db.UpdateResource(vote.Key, -1)
+			return c.String(200, " ")
+		} else if vote.Vote == "false" {
+			fmt.Print("Undoing NEGATIVE VOTE")
+			db.UpdateResource(vote.Key, 1)
+			return c.String(200, " ")
+		}
+		return c.String(500, " ")
+	})
 
 	server.GET("/api/getkey/", func(c echo.Context) error {
 		// resource := c.Request().Header.Get("X-fastgate-resource")
