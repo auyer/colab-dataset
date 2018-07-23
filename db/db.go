@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"sort"
 	"strconv"
 	"time"
 
@@ -127,6 +128,36 @@ func GetRandomKey(dbpointer *badger.DB, dbsize int) (value string, err error) {
 	return
 	// return , err
 }
+
+func GetSortedKey(dbpointer *badger.DB) (topKey string, err error) {
+	var list []Vote
+	err = dbpointer.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchSize = 10
+		it := txn.NewIterator(opts)
+		defer it.Close()
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			k := item.Key()
+			v, err := item.Value()
+			if err != nil {
+				return err
+			}
+			result, _ := binary.Varint(v)
+			list = append(list, Vote{string(k), strconv.Itoa(int(result))})
+		}
+		return nil
+	})
+	fmt.Print("HERE!")
+	sort.Slice(list, func(i, j int) bool {
+		xi, _ := strconv.Atoi(list[i].Vote)
+		xj, _ := strconv.Atoi(list[j].Vote)
+		return xi < xj
+	})
+	topKey = list[0].Key
+	return
+}
+
 func CountDBSize(dbpointer *badger.DB) (value int) {
 	_ = dbpointer.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions

@@ -139,8 +139,8 @@ func main() {
 
 	server.GET("/api/getkey/", func(c echo.Context) error {
 		// resource := c.Request().Header.Get("X-fastgate-resource")
-
-		value, err := db.GetRandomKey(database, databasesize)
+		// value, err := db.GetRandomKey(database, databasesize)
+		value, err := db.GetSortedKey(counterdb)
 		if err != nil {
 			server.Logger.Info(err.Error())
 			return c.String(http.StatusNotFound, err.Error())
