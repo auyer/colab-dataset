@@ -25,24 +25,25 @@ import (
 // confFlag stores the flags available when calling the program from the command line.
 var confFlag = flag.String("config", "./config.json", "PATH to Configuration File. See docs for example config.")
 var database *badger.DB
+var counterdb *badger.DB
 var databasesize int
 
 const (
 	banner = "Serving %s on port => %s"
 )
 
-func staticBuilder(dir string, dbpointer *badger.DB) {
+func staticBuilder(dir string, dbpointer *badger.DB, counterdb *badger.DB) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, f := range files {
 		if f.IsDir() {
-			staticBuilder(dir+"/"+f.Name(), dbpointer)
+			staticBuilder(dir+"/"+f.Name(), dbpointer, counterdb)
 		} else {
 			_ = db.InsertResource(dir+"/"+f.Name(), 0, dbpointer)
+			_ = db.InsertResource(dir+"/"+f.Name(), 0, counterdb)
 		}
-
 	}
 }
 
@@ -74,7 +75,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer database.Close()
-	staticBuilder("."+config.ConfigParams.StaticFolder, database)
+	counterdb, err = db.Init(config.ConfigParams.DatabasePath + ".count")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer counterdb.Close()
+	staticBuilder("."+config.ConfigParams.StaticFolder, database, counterdb)
 	databasesize = db.CountDBSize(database)
 
 	server.Use(middleware.Logger())
@@ -99,10 +105,12 @@ func main() {
 		}
 		if vote.Vote == "true" {
 			fmt.Print("POSITIVE VOTE")
+			db.UpdateResource(vote.Key, 1, counterdb)
 			db.UpdateResource(vote.Key, 1, database)
 			return c.String(200, " ")
 		} else if vote.Vote == "false" {
 			fmt.Print("NEGATIVE VOTE")
+			db.UpdateResource(vote.Key, 1, counterdb)
 			db.UpdateResource(vote.Key, -1, database)
 			return c.String(200, " ")
 		}
@@ -117,10 +125,12 @@ func main() {
 		}
 		if vote.Vote == "true" {
 			fmt.Print("Undoing POSITIVE VOTE")
+			db.UpdateResource(vote.Key, -1, counterdb)
 			db.UpdateResource(vote.Key, -1, database)
 			return c.String(200, " ")
 		} else if vote.Vote == "false" {
 			fmt.Print("Undoing NEGATIVE VOTE")
+			db.UpdateResource(vote.Key, -1, counterdb)
 			db.UpdateResource(vote.Key, 1, database)
 			return c.String(200, " ")
 		}
@@ -139,12 +149,25 @@ func main() {
 	})
 
 	server.GET("/api/results/", func(c echo.Context) error {
+		var countedList []db.VoteWithAmt
 		value, err := db.GetCurrentVotes(database)
 		if err != nil {
 			server.Logger.Info(err.Error())
 			return c.String(http.StatusNotFound, err.Error())
 		}
-		return c.JSON(http.StatusAccepted, value) //c.Request().Host+
+		counter, err := db.GetCurrentVotes(counterdb)
+		if err != nil {
+			server.Logger.Info(err.Error())
+			return c.String(http.StatusNotFound, err.Error())
+		}
+		for index, item := range value {
+			if item.Key == counter[index].Key {
+				countedList = append(countedList, db.VoteWithAmt{item.Key, item.Vote, counter[index].Vote})
+			} else {
+				log.Fatal("Unmatching Database")
+			}
+		}
+		return c.JSON(http.StatusAccepted, countedList) //c.Request().Host+
 	})
 
 	if config.TLSEnabled {

@@ -19,6 +19,11 @@ type Vote struct {
 	Key  string `json:"Key"`
 	Vote string `json:"Vote"`
 }
+type VoteWithAmt struct {
+	Key        string `json:"Key"`
+	Vote       string `json:"Vote"`
+	TotalVotes string `json"TotalVotes"`
+}
 
 // Init takes a path as input and reads / creates a bBadger database .
 func Init(databasePath string) (*badger.DB, error) {
