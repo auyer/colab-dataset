@@ -16,6 +16,7 @@ import (
 
 	"github.com/auyer/colab-dataset/config"
 	"github.com/auyer/colab-dataset/db"
+	"github.com/dgraph-io/badger"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/color"
@@ -23,21 +24,23 @@ import (
 
 // confFlag stores the flags available when calling the program from the command line.
 var confFlag = flag.String("config", "./config.json", "PATH to Configuration File. See docs for example config.")
+var database *badger.DB
+var databasesize int
 
 const (
 	banner = "Serving %s on port => %s"
 )
 
-func staticBuilder(dir string) {
+func staticBuilder(dir string, dbpointer *badger.DB) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, f := range files {
 		if f.IsDir() {
-			staticBuilder(dir + "/" + f.Name())
+			staticBuilder(dir+"/"+f.Name(), dbpointer)
 		} else {
-			_ = db.InsertResource(dir+"/"+f.Name(), 0)
+			_ = db.InsertResource(dir+"/"+f.Name(), 0, dbpointer)
 		}
 
 	}
@@ -66,13 +69,13 @@ func main() {
 	log.SetOutput(config.LogFile)
 
 	// Database Loading
-	err = db.Init(config.ConfigParams.DatabasePath)
+	database, err = db.Init(config.ConfigParams.DatabasePath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.GetDB().Close()
-	staticBuilder("." + config.ConfigParams.StaticFolder)
-	db.DBSize = db.CountDBSize()
+	defer database.Close()
+	staticBuilder("."+config.ConfigParams.StaticFolder, database)
+	databasesize = db.CountDBSize(database)
 
 	server.Use(middleware.Logger())
 	server.Use(middleware.Recover())
@@ -96,11 +99,11 @@ func main() {
 		}
 		if vote.Vote == "true" {
 			fmt.Print("POSITIVE VOTE")
-			db.UpdateResource(vote.Key, 1)
+			db.UpdateResource(vote.Key, 1, database)
 			return c.String(200, " ")
 		} else if vote.Vote == "false" {
 			fmt.Print("NEGATIVE VOTE")
-			db.UpdateResource(vote.Key, -1)
+			db.UpdateResource(vote.Key, -1, database)
 			return c.String(200, " ")
 		}
 		return c.String(500, " ")
@@ -114,11 +117,11 @@ func main() {
 		}
 		if vote.Vote == "true" {
 			fmt.Print("Undoing POSITIVE VOTE")
-			db.UpdateResource(vote.Key, -1)
+			db.UpdateResource(vote.Key, -1, database)
 			return c.String(200, " ")
 		} else if vote.Vote == "false" {
 			fmt.Print("Undoing NEGATIVE VOTE")
-			db.UpdateResource(vote.Key, 1)
+			db.UpdateResource(vote.Key, 1, database)
 			return c.String(200, " ")
 		}
 		return c.String(500, " ")
@@ -127,7 +130,7 @@ func main() {
 	server.GET("/api/getkey/", func(c echo.Context) error {
 		// resource := c.Request().Header.Get("X-fastgate-resource")
 
-		value, err := db.GetRandomKey()
+		value, err := db.GetRandomKey(database, databasesize)
 		if err != nil {
 			server.Logger.Info(err.Error())
 			return c.String(http.StatusNotFound, err.Error())
@@ -136,7 +139,7 @@ func main() {
 	})
 
 	server.GET("/api/results/", func(c echo.Context) error {
-		value, err := db.GetCurrentVotes()
+		value, err := db.GetCurrentVotes(database)
 		if err != nil {
 			server.Logger.Info(err.Error())
 			return c.String(http.StatusNotFound, err.Error())

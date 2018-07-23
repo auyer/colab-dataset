@@ -14,8 +14,6 @@ import (
 )
 
 // DbPointer exported variable stores a pointer to the database initialized by the Init function.
-var DbPointer *badger.DB
-var DBSize int
 
 type Vote struct {
 	Key  string `json:"Key"`
@@ -23,13 +21,9 @@ type Vote struct {
 }
 
 // Init takes a path as input and reads / creates a bBadger database .
-func Init(databasePath string) error {
+func Init(databasePath string) (*badger.DB, error) {
 	dbinfo := fmt.Sprintf(databasePath)
-
-	var err error
-	DbPointer, err = connectDB(dbinfo)
-	return err
-
+	return connectDB(dbinfo)
 }
 
 // connectDB manages the database connection and configuration.
@@ -47,18 +41,18 @@ func connectDB(databasePath string) (*badger.DB, error) {
 }
 
 // GetDB provides a pointer to the database initialized by the Init function.
-func GetDB() *badger.DB {
-	return DbPointer
-}
+// func GetDB() *badger.DB {
+// 	return DbPointer
+// }
 
 // InsertResource is a simple querry that inserts/updates the Resource tuple used by FastGate.
-func InsertResource(key string, vote int) error {
+func InsertResource(key string, vote int, dbpointer *badger.DB) error {
 	// Check if key existis
-	_, err := GetResourceValue(key)
+	_, err := GetResourceValue(key, dbpointer)
 	if err == nil {
 		return errors.New("Key Exists")
 	}
-	return DbPointer.Update(func(txn *badger.Txn) error {
+	return dbpointer.Update(func(txn *badger.Txn) error {
 		value := make([]byte, 4)
 		binary.PutVarint(value, int64(vote))
 		err := txn.Set([]byte(key), value)
@@ -67,12 +61,12 @@ func InsertResource(key string, vote int) error {
 }
 
 // UpdateResource is a simple querry that inserts/updates the Resource tuple used by FastGate.
-func UpdateResource(key string, vote int) error {
-	oldval, err := GetResourceValue(key)
+func UpdateResource(key string, vote int, dbpointer *badger.DB) error {
+	oldval, err := GetResourceValue(key, dbpointer)
 	if err != nil {
 		return err
 	}
-	return DbPointer.Update(func(txn *badger.Txn) error {
+	return dbpointer.Update(func(txn *badger.Txn) error {
 		value := make([]byte, 4)
 		binary.PutVarint(value, int64(oldval+vote))
 		err := txn.Set([]byte(key), value)
@@ -81,9 +75,9 @@ func UpdateResource(key string, vote int) error {
 }
 
 // GetResource finds an address matching an key.
-func GetResourceValue(key string) (value int, err error) {
+func GetResourceValue(key string, dbpointer *badger.DB) (value int, err error) {
 	var result int64
-	err = DbPointer.View(func(txn *badger.Txn) error {
+	err = dbpointer.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(key))
 		if err != nil {
 			return err
@@ -104,9 +98,9 @@ func GetResourceValue(key string) (value int, err error) {
 	return int(result), err
 }
 
-func GetRandomKey() (value string, err error) {
-	rcount := rand.New(rand.NewSource(time.Now().Unix())).Intn(DBSize)
-	err = DbPointer.View(func(txn *badger.Txn) error {
+func GetRandomKey(dbpointer *badger.DB, dbsize int) (value string, err error) {
+	rcount := rand.New(rand.NewSource(time.Now().Unix())).Intn(dbsize)
+	err = dbpointer.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchValues = false
 		it := txn.NewIterator(opts)
@@ -128,8 +122,8 @@ func GetRandomKey() (value string, err error) {
 	return
 	// return , err
 }
-func CountDBSize() (value int) {
-	_ = DbPointer.View(func(txn *badger.Txn) error {
+func CountDBSize(dbpointer *badger.DB) (value int) {
+	_ = dbpointer.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchValues = false
 		it := txn.NewIterator(opts)
@@ -143,9 +137,9 @@ func CountDBSize() (value int) {
 	return
 }
 
-func GetCurrentVotes() (list []Vote, err error) {
+func GetCurrentVotes(dbpointer *badger.DB) (list []Vote, err error) {
 	// list := make(chan struct {string; string})
-	err = DbPointer.View(func(txn *badger.Txn) error {
+	err = dbpointer.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
 		it := txn.NewIterator(opts)
