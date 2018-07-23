@@ -7,13 +7,27 @@
     var lastvote;
     var previmagekey;
     var imagekey;
+    "/api/getTotalSize/"
     function GetAsync(){
         fetch('http://'+ location.hostname + '/api/getkey/').then(function(response) {
             response.text().then(function(text) {
                 imagekey = text;
                 document.getElementById("imagedisplay").src = text;
+                return
                 });
+            return
             });
+        return
+    }
+    function SetTotalSize(){
+        fetch('http://'+ location.hostname + '/api/getTotalSize/').then(function(response) {
+            response.text().then(function(text) {
+                document.getElementById("totalsizetext").innerHTML = "<strong>" + text + "</strong>";
+                return
+                });
+            return
+            });
+        return
     }
     function GetLastpic(){
         imagekey = previmagekey;
@@ -54,6 +68,7 @@
         }
     }
     function voteAndFetch(boolVote){
+        document.getElementById("hintText").style.display="none";
         vote('http://'+ location.hostname, boolVote);
         lastvote = boolVote;
         previmagekey = imagekey;
@@ -68,24 +83,30 @@
     }
     </script>
 </head>
-<body onload="GetAsync()">
+<body onload="GetAsync(); SetTotalSize();">
     <div id="page" class="container">
         <div class="navbar row" style="color: #7b818c; background-color:#7b818c">
             <div>
                 <img src="./media/forseclogo.png" style="width: 12.5em; margin: 5px; margin-left: 20px" alt="UCD Forensics and Security Research Group Logo">
-                <!-- <h1>UCD ForSec Group</h1> -->
             </div>
             <div>
                 <p><font color="white">Help us cassify Hotel Room pictures. If the picture shown is or not a photo of a Hotel Room.</font></p>
                 <p><font color="white">Instructions: Slide, Use the Keyboard Keys, or Click the buttons.</font></p>
-            </div>
-                
+            </div>  
         </div>
         <br>
+        <div id="hintText" style="display: true">
+            <h1>How to contribuite:</h1>
+            <h2>On PC: </h2> <strong><p> Use the Keyboard shotcuts to help you vote faster. Left Arrow Key ( &#8592; ) to vote NO, Right Arrow Key (&#8594;) to vote yes, and U key to Undo last vote.</p></strong>
+            <h2>On SmartPhones : </h2> <strong><p> Landscape Mode Recomended. Use Swipe Left ( &#8592; ) to vote NO, Swipe Right (&#8594;) to vote yes. Or click the buttons.</p></strong>
+            <br>
+            <h3>Vote on the first picture to continue, and this hint will disapear.</h3>
+            <br>
+        </div>
         <div class="container">
             <div class="row">
                 <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-danger" on-hold="voteAndFetch('false');" on-tap="voteAndFetch('false');" on-tap="voteAndFetch('false');" on-touch="voteAndFetch('false');" onclick="voteAndFetch('false');" >&#8592;</button></h1><h1>&#215;</h1><h2 class="text-align text-center">NOT A ROOM</h2></div>
-                <div class="col-sm-10 col-md-8"><img class="text-align text-center" id="imagedisplay" style="text-align: center" src="" alt=""></div>
+                <div id="imagediv" class="col-sm-10 col-md-8"><img class="text-align text-center" id="imagedisplay" style="text-align: center" src="" alt=""></div>
                 <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-success" on-hold="voteAndFetch('true');" on-tap="voteAndFetch('true');" on-tap="voteAndFetch('true');" on-touch="voteAndFetch('true');" onclick="voteAndFetch('true');">&#8594;</button></h1><h1>&#10003;</h1><h2 class="text-align text-center">IS A ROOM</h2></div>
             </div>
         </div>
@@ -95,9 +116,9 @@
         </div>
         <br>
         <br>
-        <footer class="page-footer font-small blue fixed-bottom" >
+        <footer class="page-footer font-small blue fixed-bottom">
             <div class="footer-copyright text-center py-3" style="color: #7b818c; background-color:#7b818c" >
-                <font color="white">You calssified</font> <font color="lime" id="counter">0</font>
+                <font color="white">You calssified</font> <font color="lime" id="counter">0</font> <font color="white">out of </font><font color="lime" id="totalsizetext">0</font>
                 <font color="white"> images. &nbsp;&nbsp; Thank you for your help.</font>
         </div>
         </footer>
@@ -155,8 +176,8 @@
     }  
 
 window.addEventListener('load', function(){
-    var el = document.getElementById('page')
-    var inner = document.getElementById('page')
+    var el = document.getElementById('imagediv')
+    var inner = document.getElementById('imagediv')
     var hidetimer = null
     swipedetect(el, function(swipedir){
         if (swipedir == 'left'){
@@ -168,7 +189,6 @@ window.addEventListener('load', function(){
         }
     })
 }, false)
-
 document.addEventListener("keydown", function(event) {
     if(event.keyCode == 37){
         console.log(event.which);

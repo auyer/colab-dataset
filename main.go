@@ -147,6 +147,11 @@ func main() {
 		}
 		return c.String(http.StatusAccepted, value) //c.Request().Host+
 	})
+	server.GET("/api/getTotalSize/", func(c echo.Context) error {
+		fmt.Println("HERE")
+		fmt.Println(databasesize)
+		return c.String(http.StatusAccepted, strconv.Itoa(databasesize)) //c.Request().Host+
+	})
 
 	server.GET("/api/results/", func(c echo.Context) error {
 		var countedList []db.VoteWithAmt
