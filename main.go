@@ -154,7 +154,7 @@ func main() {
 	})
 
 	server.GET("/api/results/", func(c echo.Context) error {
-		var countedList []db.VoteWithAmt
+		var countedList []db.VoteIntAmt
 		value, err := db.GetCurrentVotes(database)
 		if err != nil {
 			server.Logger.Info(err.Error())
@@ -167,7 +167,7 @@ func main() {
 		}
 		for index, item := range value {
 			if item.Key == counter[index].Key {
-				countedList = append(countedList, db.VoteWithAmt{item.Key, item.Vote, counter[index].Vote})
+				countedList = append(countedList, db.VoteIntAmt{item.Key, item.Vote, counter[index].Vote})
 			} else {
 				log.Fatal("Unmatching Database")
 			}

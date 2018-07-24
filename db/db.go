@@ -8,22 +8,28 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/dgraph-io/badger"
 )
 
-// DbPointer exported variable stores a pointer to the database initialized by the Init function.
-
+// Vote strcucture used to process voting from the API with strings instead of numbers. This is intended to make voting safer, and avoid requests with a value bigger than 1.
 type Vote struct {
 	Key  string `json:"Key"`
 	Vote string `json:"Vote"`
 }
-type VoteWithAmt struct {
+
+// VoteInt structure used to process votes inside the API, including sorting.
+type VoteInt struct {
+	Key  string `json:"Key"`
+	Vote int    `json:"Vote"`
+}
+
+// VoteIntAmt structure is used to merge data from both databases (Votes and Amount of Votes)
+type VoteIntAmt struct {
 	Key        string `json:"Key"`
-	Vote       string `json:"Vote"`
-	TotalVotes string `json"TotalVotes"`
+	Vote       int    `json:"Vote"`
+	TotalVotes int    `json"TotalVotes"`
 }
 
 // Init takes a path as input and reads / creates a bBadger database .
@@ -45,11 +51,6 @@ func connectDB(databasePath string) (*badger.DB, error) {
 	}
 	return db, nil
 }
-
-// GetDB provides a pointer to the database initialized by the Init function.
-// func GetDB() *badger.DB {
-// 	return DbPointer
-// }
 
 // InsertResource is a simple querry that inserts/updates the Resource tuple used by FastGate.
 func InsertResource(key string, vote int, dbpointer *badger.DB) error {
@@ -130,7 +131,7 @@ func GetRandomKey(dbpointer *badger.DB, dbsize int) (value string, err error) {
 }
 
 func GetSortedKey(dbpointer *badger.DB) (topKey string, err error) {
-	var list []Vote
+	var list []VoteInt
 	err = dbpointer.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 10
@@ -144,15 +145,13 @@ func GetSortedKey(dbpointer *badger.DB) (topKey string, err error) {
 				return err
 			}
 			result, _ := binary.Varint(v)
-			list = append(list, Vote{string(k), strconv.Itoa(int(result))})
+			list = append(list, VoteInt{string(k), int(result)})
 		}
 		return nil
 	})
 	fmt.Print("HERE!")
 	sort.Slice(list, func(i, j int) bool {
-		xi, _ := strconv.Atoi(list[i].Vote)
-		xj, _ := strconv.Atoi(list[j].Vote)
-		return xi < xj
+		return list[i].Vote < list[j].Vote
 	})
 	topKey = list[0].Key
 	return
@@ -173,7 +172,7 @@ func CountDBSize(dbpointer *badger.DB) (value int) {
 	return
 }
 
-func GetCurrentVotes(dbpointer *badger.DB) (list []Vote, err error) {
+func GetCurrentVotes(dbpointer *badger.DB) (list []VoteInt, err error) {
 	// list := make(chan struct {string; string})
 	err = dbpointer.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
@@ -188,7 +187,7 @@ func GetCurrentVotes(dbpointer *badger.DB) (list []Vote, err error) {
 				return err
 			}
 			result, _ := binary.Varint(v)
-			list = append(list, Vote{string(k), strconv.Itoa(int(result))})
+			list = append(list, VoteInt{string(k), int(result)})
 		}
 		return nil
 	})
