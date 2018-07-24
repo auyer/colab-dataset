@@ -24,14 +24,17 @@ import (
 
 // confFlag stores the flags available when calling the program from the command line.
 var confFlag = flag.String("config", "./config.json", "PATH to Configuration File. See docs for example config.")
+
+// database stores the pointer for the voting databse
 var database *badger.DB
+
+// counterdb stores the pointer for the vote counter databse
 var counterdb *badger.DB
+
+// databasesize stores the amount of items found while scanning the folder
 var databasesize int
 
-const (
-	banner = "Serving %s on port => %s"
-)
-
+// staticBuilder function reads through the provided directory and populates the databases
 func staticBuilder(dir string, dbpointer *badger.DB, counterdb *badger.DB) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -51,7 +54,6 @@ func main() {
 	server := echo.New()
 	server.HideBanner = true
 	server.HidePort = true
-	log.Printf("Starting FastGate APIGateway")
 	flag.Parse()
 	err := config.ReadConfig(*confFlag)
 	if err != nil {
@@ -61,9 +63,9 @@ func main() {
 	}
 	server.Debug, _ = strconv.ParseBool(config.ConfigParams.Debug)
 	if config.TLSEnabled {
-		log.Printf(banner, color.Green("HTTPS"), color.Green(config.ConfigParams.HttpsPort))
+		log.Printf("Serving %s on port => %s", color.Green("HTTPS"), color.Green(config.ConfigParams.HttpsPort))
 	} else {
-		log.Printf(banner, color.Red("HTTP"), color.Green(config.ConfigParams.HttpPort))
+		log.Printf("Serving %s on port => %s", color.Red("HTTP"), color.Green(config.ConfigParams.HttpPort))
 	}
 
 	server.Logger.SetOutput(config.LogFile)

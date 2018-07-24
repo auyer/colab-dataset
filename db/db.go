@@ -1,4 +1,4 @@
-// Package db manages route storage for FastGate.
+// Package db manages voting storage for.
 // The storage is performed by a Key-Value community database called Badger.
 package db
 
@@ -52,7 +52,7 @@ func connectDB(databasePath string) (*badger.DB, error) {
 	return db, nil
 }
 
-// InsertResource is a simple querry that inserts/updates the Resource tuple used by FastGate.
+// InsertResource is a simple querry that inserts/updates the Resource tuple used by .
 func InsertResource(key string, vote int, dbpointer *badger.DB) error {
 	// Check if key existis
 	_, err := GetResourceValue(key, dbpointer)
@@ -67,7 +67,7 @@ func InsertResource(key string, vote int, dbpointer *badger.DB) error {
 	})
 }
 
-// UpdateResource is a simple querry that inserts/updates the Resource tuple used by FastGate.
+// UpdateResource is a simple querry that inserts/updates the Resource tuple.
 func UpdateResource(key string, vote int, dbpointer *badger.DB) error {
 	oldval, err := GetResourceValue(key, dbpointer)
 	if err != nil {
@@ -81,7 +81,7 @@ func UpdateResource(key string, vote int, dbpointer *badger.DB) error {
 	})
 }
 
-// GetResource finds an address matching an key.
+// GetResourceValue returns the value of a specified resource
 func GetResourceValue(key string, dbpointer *badger.DB) (value int, err error) {
 	var result int64
 	err = dbpointer.View(func(txn *badger.Txn) error {
@@ -105,6 +105,7 @@ func GetResourceValue(key string, dbpointer *badger.DB) (value int, err error) {
 	return int(result), err
 }
 
+// GetRandomKey returns a random key from the database
 func GetRandomKey(dbpointer *badger.DB, dbsize int) (value string, err error) {
 	rcount := rand.New(rand.NewSource(time.Now().Unix())).Intn(dbsize)
 	err = dbpointer.View(func(txn *badger.Txn) error {
@@ -122,14 +123,13 @@ func GetRandomKey(dbpointer *badger.DB, dbsize int) (value string, err error) {
 			} else {
 				acount += 1
 			}
-
 		}
 		return nil
 	})
 	return
-	// return , err
 }
 
+// GetSortedKey will return the key with the smallest value
 func GetSortedKey(dbpointer *badger.DB) (topKey string, err error) {
 	var list []VoteInt
 	err = dbpointer.View(func(txn *badger.Txn) error {
@@ -157,6 +157,7 @@ func GetSortedKey(dbpointer *badger.DB) (topKey string, err error) {
 	return
 }
 
+// CountDBSize will return the amount of entries in the database
 func CountDBSize(dbpointer *badger.DB) (value int) {
 	_ = dbpointer.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
@@ -172,6 +173,7 @@ func CountDBSize(dbpointer *badger.DB) (value int) {
 	return
 }
 
+// GetCurrentVotes will return a list of the votes in the database.
 func GetCurrentVotes(dbpointer *badger.DB) (list []VoteInt, err error) {
 	// list := make(chan struct {string; string})
 	err = dbpointer.View(func(txn *badger.Txn) error {
