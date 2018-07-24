@@ -1,0 +1,11 @@
+{
+    "Debug": "true",
+    "LogLocation": "./server.log",
+    "HttpPort": "8000",
+    "HttpsPort": "8443",
+    "TLSKeyLocation": "./devssl/server.key",
+    "TLSCertLocation": "./devssl/server.pem",
+    "DatabasePath" : "./fastgate.db",
+    "StaticFolder" : "./static"
+
+}
