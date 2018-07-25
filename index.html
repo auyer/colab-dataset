@@ -68,6 +68,7 @@
         }
     }
     function voteAndFetch(boolVote){
+        document.getElementById("undoRow").style.visibility="visible";
         document.getElementById("hintText").style.display="none";
         vote('http://'+ location.hostname, boolVote);
         lastvote = boolVote;
@@ -78,6 +79,10 @@
         return;
     }
     function undoVote(){
+        if (document.getElementById("undoRow").style.visibility == "hidden"){
+            return
+        }
+        document.getElementById("undoRow").style.visibility="hidden";
         GetLastpic();
         unvote('http://'+ location.hostname, lastvote);
     }
@@ -94,15 +99,27 @@
             </div>  
         </div>
         <br>
-        <div id="hintText" class="container" style="display: true; background-color:#c0c2c7; border-radius: 15px; padding: 20px;" >
+        <div id="hintText" class="container" style="background-color:#c0c2c7; border-radius: 15px; padding: 20px;" >
             <h1>READ BEFORE PROCEEDING</h1>
             <p>This will help with an important Deep Learning Research project that aims to assist with forensic research in the future.</p>
             <p>We do not record any information regarding the user, and do not use any cookies. All contribuitions made to this project are anonymous and voluntary.</p>
             <h2>How to contribuite:</h2>
-            <h3>On Desktop: </h3> <strong><p> Use the Keyboard shotcuts or click the buttons. Left Arrow Key  <img src="./media/leftArrow.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt="Left Arrow Key (&#8592;)">  to vote NO, &nbsp;  Right Arrow Key <img src="./media/rightArrow.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt="Right Arrow Key (&#8594;)"> to vote yes, &nbsp; and <img src="./media/uKey.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt=" U Keyboard key"> key to Undo last vote.</p></strong>
-            <h3>On SmartPhones : </h3> <strong><p> Landscape Mode Recommended. Swipe the picture to the Left ( &#8592; ) to vote NO, &nbsp; Swipe the picture to the Right (&#8594;) to vote yes. Or click the buttons.</p></strong>
-            <br>
-            <h3>Vote on the first picture to continue, and this hint will disapear.</h3>
+            <hr>
+            <div class="row">
+                <div class="col-md-6 col-sm-12 col-xs-12">
+                    <h3>On Desktop: </h3> <strong><p> To vote, click the buttons or se the Keyboard shotcuts: </p> 
+                    <p>Left Arrow Key  <img src="./media/leftArrow.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt="Left Arrow Key (&#8592;)">  to vote <font color="red">NO</font>, </p>
+                    <p>  Right Arrow Key <img src="./media/rightArrow.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt="Right Arrow Key (&#8594;)"> to vote <font color="green">YES</font>, </p>
+                    <p>and <img src="./media/uKey.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt=" U Keyboard key"> key to Undo last vote.</p></strong>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"> 
+                    <h3>On SmartPhones : </h3> <strong><p> Landscape Mode Recommended. To vote, click the buttons, or:
+                    <p> Swipe the picture to the Left ( &#8592; ) to vote <font color="red">NO</font> </p> <p> Swipe the picture to the Right (&#8594;) to vote <font color="green">YES</font></p></strong>
+                    <br>
+                </div>
+            </div>
+            <hr>
+            <h3>Vote on the first picture to continue, or click <button onclick='document.getElementById("hintText").style.display="none"'>here</button>, and this hint will disappear.</h3>
         </div>
         <br>
         <div class="container">
@@ -118,11 +135,9 @@
             <font color=""> images. &nbsp; Thank you for your help!</font>
         </p>
         <br>
-        <div class="row">
+        <div id="undoRow" class="row" style="visibility: hidden">
             <div class="col-sm-12 col-md-12 text-center"><h1><button class="btn-danger text-align text-center" on-hold="undoVote();" on-tap="undoVote();" on-tap="undoVote();" on-touch="undoVote();" onclick="undoVote();">&#x21ba;</button></h1><h2 class="text-align text-center">UNDO LAST VOTE</h2> <h3>Shortcut: U</h3></div>
         </div>
-        <br>
-        <br>
         <br>
         <br>
          <footer class="page-footer font-small blue "> <!--fixed-bottom -->
