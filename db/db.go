@@ -149,7 +149,6 @@ func GetSortedKey(dbpointer *badger.DB) (topKey string, err error) {
 		}
 		return nil
 	})
-	fmt.Print("HERE!")
 	sort.Slice(list, func(i, j int) bool {
 		return list[i].Vote < list[j].Vote
 	})

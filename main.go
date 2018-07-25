@@ -5,7 +5,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -57,7 +56,7 @@ func main() {
 	flag.Parse()
 	err := config.ReadConfig(*confFlag)
 	if err != nil {
-		fmt.Print("Error reading configuration file")
+		log.Print("Error reading configuration file")
 		log.Print(err.Error())
 		return
 	}
@@ -106,12 +105,12 @@ func main() {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 		if vote.Vote == "true" {
-			fmt.Print("POSITIVE VOTE")
+			// log.Print("POSITIVE VOTE")
 			db.UpdateResource(vote.Key, 1, counterdb)
 			db.UpdateResource(vote.Key, 1, database)
 			return c.String(200, " ")
 		} else if vote.Vote == "false" {
-			fmt.Print("NEGATIVE VOTE")
+			// log.Print("NEGATIVE VOTE")
 			db.UpdateResource(vote.Key, 1, counterdb)
 			db.UpdateResource(vote.Key, -1, database)
 			return c.String(200, " ")
@@ -126,12 +125,12 @@ func main() {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 		if vote.Vote == "true" {
-			fmt.Print("Undoing POSITIVE VOTE")
+			// log.Print("Undoing POSITIVE VOTE")
 			db.UpdateResource(vote.Key, -1, counterdb)
 			db.UpdateResource(vote.Key, -1, database)
 			return c.String(200, " ")
 		} else if vote.Vote == "false" {
-			fmt.Print("Undoing NEGATIVE VOTE")
+			// log.Print("Undoing NEGATIVE VOTE")
 			db.UpdateResource(vote.Key, -1, counterdb)
 			db.UpdateResource(vote.Key, 1, database)
 			return c.String(200, " ")
@@ -150,8 +149,7 @@ func main() {
 		return c.String(http.StatusAccepted, value) //c.Request().Host+
 	})
 	server.GET("/api/getTotalSize/", func(c echo.Context) error {
-		fmt.Println("HERE")
-		fmt.Println(databasesize)
+		// log.Println(databasesize)
 		return c.String(http.StatusAccepted, strconv.Itoa(databasesize)) //c.Request().Host+
 	})
 
