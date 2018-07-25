@@ -85,41 +85,49 @@
 </head>
 <body onload="GetAsync(); SetTotalSize();">
     <div id="page" class="container">
-        <div class="navbar row" style="color: #7b818c; background-color:#7b818c">
+        <div class="navbar row" style=" background-color:#7b818c; border-radius: 0px 0px 15px 15px;">
             <div>
                 <img src="./media/forseclogo.png" style="width: 12.5em; margin: 5px; margin-left: 20px" alt="UCD Forensics and Security Research Group Logo">
             </div>
             <div>
-                <p><font color="white">Help us cassify Hotel Room pictures. If the picture shown is or not a photo of a Hotel Room.</font></p>
-                <p><font color="white">Instructions: Slide, Use the Keyboard Keys, or Click the buttons.</font></p>
+                <p><font color="white" style="float: right">Help Research cassifing Hotel Room pictures. Vote if the picture shown is or is not a photo of a Hotel Room.</font></p>
             </div>  
         </div>
         <br>
-        <div id="hintText" style="display: true">
-            <h1>How to contribuite:</h1>
-            <h2>On PC: </h2> <strong><p> Use the Keyboard shotcuts to help you vote faster. Left Arrow Key ( &#8592; ) to vote NO, Right Arrow Key (&#8594;) to vote yes, and U key to Undo last vote.</p></strong>
-            <h2>On SmartPhones : </h2> <strong><p> Landscape Mode Recomended. Use Swipe Left ( &#8592; ) to vote NO, Swipe Right (&#8594;) to vote yes. Or click the buttons.</p></strong>
+        <div id="hintText" class="container" style="display: true; background-color:#c0c2c7; border-radius: 15px; padding: 20px;" >
+            <h1>READ BEFORE PROCEEDING</h1>
+            <p>This will help with an important Deep Learning Research project that aims to assist with forensic research in the future.</p>
+            <p>We do not record any information regarding the user, and do not use any cookies. All contribuitions made to this project are anonymous and voluntary.</p>
+            <h2>How to contribuite:</h2>
+            <h3>On Desktop: </h3> <strong><p> Use the Keyboard shotcuts or click the buttons. Left Arrow Key  <img src="./media/leftArrow.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt="Left Arrow Key (&#8592;)">  to vote NO, &nbsp;  Right Arrow Key <img src="./media/rightArrow.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt="Right Arrow Key (&#8594;)"> to vote yes, &nbsp; and <img src="./media/uKey.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt=" U Keyboard key"> key to Undo last vote.</p></strong>
+            <h3>On SmartPhones : </h3> <strong><p> Landscape Mode Recommended. Swipe the picture to the Left ( &#8592; ) to vote NO, &nbsp; Swipe the picture to the Right (&#8594;) to vote yes. Or click the buttons.</p></strong>
             <br>
             <h3>Vote on the first picture to continue, and this hint will disapear.</h3>
-            <br>
         </div>
+        <br>
         <div class="container">
             <div class="row">
-                <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-danger" on-hold="voteAndFetch('false');" on-tap="voteAndFetch('false');" on-tap="voteAndFetch('false');" on-touch="voteAndFetch('false');" onclick="voteAndFetch('false');" >&#8592;</button></h1><h1>&#215;</h1><h2 class="text-align text-center">NOT A ROOM</h2></div>
+                <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-danger" on-hold="voteAndFetch('false');" on-tap="voteAndFetch('false');" on-tap="voteAndFetch('false');" on-touch="voteAndFetch('false');" onclick="voteAndFetch('false');" >&#8592;</button></h1><h1>&#215;</h1><h2 class="text-align text-center">NOT A HOTEL ROOM</h2></div>
                 <div id="imagediv" class="col-sm-10 col-md-8"><img class="text-align text-center" id="imagedisplay" style="text-align: center" src="" alt=""></div>
-                <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-success" on-hold="voteAndFetch('true');" on-tap="voteAndFetch('true');" on-tap="voteAndFetch('true');" on-touch="voteAndFetch('true');" onclick="voteAndFetch('true');">&#8594;</button></h1><h1>&#10003;</h1><h2 class="text-align text-center">IS A ROOM</h2></div>
+                <div class="col-sm-1 col-md-2 text-align text-center"><h1><button class="btn-success" on-hold="voteAndFetch('true');" on-tap="voteAndFetch('true');" on-tap="voteAndFetch('true');" on-touch="voteAndFetch('true');" onclick="voteAndFetch('true');">&#8594;</button></h1><h1>&#10003;</h1><h2 class="text-align text-center">IS A HOTEL ROOM</h2></div>
             </div>
         </div>
+        <p class="text-center">
+            <font color="">You have classified</font> <font color="lime" id="counter">0</font> <font color="">out of </font>
+            <font color="lime" id="totalsizetext">0</font>
+            <font color=""> images. &nbsp; Thank you for your help!</font>
+        </p>
         <br>
         <div class="row">
             <div class="col-sm-12 col-md-12 text-center"><h1><button class="btn-danger text-align text-center" on-hold="undoVote();" on-tap="undoVote();" on-tap="undoVote();" on-touch="undoVote();" onclick="undoVote();">&#x21ba;</button></h1><h2 class="text-align text-center">UNDO LAST VOTE</h2> <h3>Shortcut: U</h3></div>
         </div>
         <br>
         <br>
-        <footer class="page-footer font-small blue fixed-bottom">
-            <div class="footer-copyright text-center py-3" style="color: #7b818c; background-color:#7b818c" >
-                <font color="white">You calssified</font> <font color="lime" id="counter">0</font> <font color="white">out of </font><font color="lime" id="totalsizetext">0</font>
-                <font color="white"> images. &nbsp;&nbsp; Thank you for your help.</font>
+        <br>
+        <br>
+         <footer class="page-footer font-small blue "> <!--fixed-bottom -->
+            <div class="footer-copyright text-center py-3" style="background-color:#7b818c; border-radius: 15px 15px 0px 0px;" >
+        <p><font color="white"> This is a purely academic, non-profit making and fully  <a href="http://github.com/auyer/colab-dataset">open source</a> project. It is licensed under the <a href="https://github.com/auyer/colab-dataset/blob/master/LICENSE">MIT license</a></p> <p> All the picture rights reserved for original owners: TripAdvidor </font></p>
         </div>
         </footer>
     </div>
@@ -136,7 +144,7 @@
         startY,
         distX,
         distY,
-        threshold = 150, //required min distance traveled to be considered swipe
+        threshold = 25, //required min distance traveled to be considered swipe
         restraint = 100, // maximum distance allowed at the same time in perpendicular direction
         allowedTime = 300, // maximum time allowed to travel that distance
         elapsedTime,
