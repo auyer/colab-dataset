@@ -11,7 +11,10 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger"
+	options "github.com/dgraph-io/badger/options"
 )
+
+var colabOpts badger.Options
 
 // Vote strcucture used to process voting from the API with strings instead of numbers. This is intended to make voting safer, and avoid requests with a value bigger than 1.
 type Vote struct {
@@ -42,6 +45,10 @@ func Init(databasePath string) (*badger.DB, error) {
 func connectDB(databasePath string) (*badger.DB, error) {
 
 	opts := badger.DefaultOptions
+	opts.NumMemtables = 7000
+	opts.TableLoadingMode = options.LoadToRAM
+	opts.ValueThreshold = 7000
+	opts.DoNotCompact = true
 	opts.Dir = databasePath
 	opts.ValueDir = databasePath
 	db, err := badger.Open(opts)
@@ -131,10 +138,14 @@ func GetRandomKey(dbpointer *badger.DB, dbsize int) (value string, err error) {
 
 // GetSortedKey will return the key with the smallest value
 func GetSortedKey(dbpointer *badger.DB) (topKey string, err error) {
+	rcount := rand.New(rand.NewSource(time.Now().Unix())).Intn(2)
 	var list []VoteInt
 	err = dbpointer.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
-		opts.PrefetchSize = 10
+		opts.PrefetchSize = 70000
+		if rcount == 1 {
+			opts.Reverse = true
+		}
 		it := txn.NewIterator(opts)
 		defer it.Close()
 		for it.Rewind(); it.Valid(); it.Next() {

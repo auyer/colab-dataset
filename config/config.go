@@ -15,11 +15,14 @@ var (
 	LogFile io.Writer
 	// TLSEnabled is used to tell if the config package was os was not able to load key and certification pair from the specified path.
 	TLSEnabled bool
+	AutoTLS    bool
 	// ConfigParams  *configStruct stores the values found in the config file, or the default values.
 	ConfigParams = configStruct{
 		LogLocation:     "",
-		HttpPort:        "80",
-		HttpsPort:       "8443",
+		HttpAddress:     "80",
+		HttpsAddress:    "443",
+		AutoTLS:         false,
+		Adress:          "",
 		TLSKeyLocation:  "./devssl/server.key",
 		TLSCertLocation: "./devssl/server.pem",
 		DatabasePath:    "./votes.db",
@@ -31,8 +34,10 @@ var (
 // configStruct is the structure expected to match with the configuration file.
 type configStruct struct {
 	LogLocation     string `json:"LogLocation"`
-	HttpPort        string `json:"HttpPort"`
-	HttpsPort       string `json:"HttpsPort"`
+	HttpAddress     string `json:"HttpAddress"`
+	HttpsAddress    string `json:"HttpsAddress"`
+	AutoTLS         bool   `json:"AutoTLS"`
+	Adress          string `json: "Address"`
 	TLSKeyLocation  string `json:"TLSKeyLocation"`
 	TLSCertLocation string `json:"TLSCertLocation"`
 	DatabasePath    string `json:"DatabasePath"`
@@ -68,7 +73,11 @@ func ReadConfig(configPath string) error {
 	}
 	_, cerl := os.Stat(ConfigParams.TLSCertLocation)
 	_, keyl := os.Stat(ConfigParams.TLSKeyLocation)
-	if os.IsNotExist(cerl) && os.IsNotExist(keyl) {
+	if ConfigParams.AutoTLS {
+		AutoTLS = true
+		TLSEnabled = false
+		fmt.Println("Using AutoTLS")
+	} else if os.IsNotExist(cerl) && os.IsNotExist(keyl) {
 		fmt.Println("TLS DISABLED: Unable to find Key and/or Certificate")
 		TLSEnabled = false
 	} else {

@@ -13,8 +13,8 @@ const (
 	testConfig        = `{
 		"Debug": "false",
 		"LogLocation": "./test_server.config_test.go.log",
-		"HttpPort": "8888test",
-		"HttpsPort": "8443test",
+		"HttpAddress": "8888test",
+		"HttpsAddress": "8443test",
 		"TLSKeyLocation": "./tls_test.go.key",
 		"TLSCertLocation": "./tls.test.go.pem",
 		"DatabasePath" : "./test_fastgate.db",
@@ -37,7 +37,7 @@ func TestConfRead(t *testing.T) {
 	}
 	tmp := ConfigParams
 	fmt.Printf(tmp.Debug)
-	if ConfigParams.Debug != "true" && ConfigParams.LogLocation != "os.Stdout" && ConfigParams.HttpPort != "8080" && ConfigParams.HttpsPort != "8443" && ConfigParams.TLSKeyLocation != "./devssl/server.key" &&
+	if ConfigParams.Debug != "true" && ConfigParams.LogLocation != "os.Stdout" && ConfigParams.HttpAddress != "8080" && ConfigParams.HttpsAddress != "8443" && ConfigParams.TLSKeyLocation != "./devssl/server.key" &&
 		ConfigParams.TLSCertLocation != "./devssl/server.pem" && ConfigParams.DatabasePath != "./fastgate.db" {
 		t.Errorf("Default Configuration read wrongly.")
 	}
@@ -82,7 +82,7 @@ func TestConfRead(t *testing.T) {
 		fileConf.Close()
 		//CREATE cert Test Files
 	}
-	if ConfigParams.Debug != "false" && ConfigParams.LogLocation != "./test_server.config_test.go.log" && ConfigParams.HttpPort != "8888test" && ConfigParams.HttpsPort != "88443test" && ConfigParams.DatabasePath != "./test_fastgate.db" && TLSEnabled != true {
+	if ConfigParams.Debug != "false" && ConfigParams.LogLocation != "./test_server.config_test.go.log" && ConfigParams.HttpAddress != "8888test" && ConfigParams.HttpsAddress != "88443test" && ConfigParams.DatabasePath != "./test_fastgate.db" && TLSEnabled != true {
 		t.Errorf("Configuration read from file interpreted wrongly.")
 	} else if _, err := os.Stat(ConfigParams.TLSCertLocation); os.IsNotExist(err) {
 		t.Errorf("Unable to Create Log File at" + ConfigParams.LogLocation)
