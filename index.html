@@ -9,18 +9,37 @@
     var imagekey;
     "/api/getTotalSize/"
     function GetAsync(){
-        fetch('http://'+ location.hostname + '/api/getkey/').then(function(response) {
+        fetch('http://'+ location.hostname + ':80/api/getkey/').then(function(response) {
             response.text().then(function(text) {
                 imagekey = text;
-                document.getElementById("imagedisplay").src = text;
+                document.getElementById("imagedisplay").src = text + '?d=' + Date.now();
                 return
                 });
             return
             });
         return
     }
+    function GetAsyncNew(){
+        voteObj = {"key": imagekey, "vote": true};
+        fetch('http://'+ location.hostname + ':80/api/getnewkey/', {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json; charset=UTF-8'
+            },
+            body: JSON.stringify(voteObj),
+        }).then(function(response) {
+                response.text().then(function(text) {
+                    imagekey = text;
+                    document.getElementById("imagedisplay").src = text + '?d=' + Date.now();
+                    return
+                    });
+                return
+                });
+        return
+    }
     function SetTotalSize(){
-        fetch('http://'+ location.hostname + '/api/getTotalSize/').then(function(response) {
+        fetch('http://'+ location.hostname + ':8888/api/getTotalSize/').then(function(response) {
             response.text().then(function(text) {
                 document.getElementById("totalsizetext").innerHTML = "<strong>" + text + "</strong>";
                 return
@@ -42,7 +61,7 @@
         count -=1;
         return _vote(url,boolVote,"/api/unvote/")
     }
-    function _vote(url,boolVote,path){ 
+    function _vote(url,boolVote,path){
         voteObj = {"key": imagekey, "vote": boolVote};
         console.log(JSON.stringify(voteObj))
         fetch(url + path, {
@@ -70,12 +89,12 @@
     function voteAndFetch(boolVote){
         document.getElementById("undoRow").style.visibility="visible";
         document.getElementById("hintText").style.display="none";
-        vote('http://'+ location.hostname, boolVote);
+        vote('http://'+ location.hostname + ":80", boolVote);
         lastvote = boolVote;
         previmagekey = imagekey;
-        sleep(50);
-        GetAsync();
-        sleep(100);
+        sleep(1);
+        GetAsyncNew();
+        sleep(0.1);
         return;
     }
     function undoVote(){
@@ -84,7 +103,7 @@
         }
         document.getElementById("undoRow").style.visibility="hidden";
         GetLastpic();
-        unvote('http://'+ location.hostname, lastvote);
+        unvote('http://'+ location.hostname + ":80", lastvote);
     }
     </script>
 </head>
@@ -96,7 +115,7 @@
             </div>
             <div>
                 <p><font color="white" style="float: right">Help Research cassifing Hotel Room pictures. Vote if the picture shown is or is not a photo of a Hotel Room.</font></p>
-            </div>  
+            </div>
         </div>
         <br>
         <div id="hintText" class="container" style="background-color:#c0c2c7; border-radius: 15px; padding: 20px;" >
@@ -108,12 +127,12 @@
             <br>
             <div class="row">
                 <div class="col-md-6 col-sm-12 col-xs-12">
-                    <h3>On Desktop: </h3> <strong><p> To vote, click the buttons or use the Keyboard shotcuts: </p> 
+                    <h3>On Desktop: </h3> <strong><p> To vote, click the buttons or use the Keyboard shotcuts: </p>
                     <p>Left Arrow Key  <img src="./media/leftArrow.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt="Left Arrow Key (&#8592;)">  to vote <font color="red">NO</font>, </p>
                     <p>  Right Arrow Key <img src="./media/rightArrow.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt="Right Arrow Key (&#8594;)"> to vote <font color="green">YES</font>, </p>
                     <p>and <img src="./media/uKey.png" style="display: block inline inline-block; height: 2em; width: 2em;" alt=" U Keyboard key"> key to Undo last vote.</p></strong>
                 </div>
-                <div class="col-md-6 col-sm-12 col-xs-12"> 
+                <div class="col-md-6 col-sm-12 col-xs-12">
                     <h3>On SmartPhones : </h3> <strong><p> Landscape Mode Recommended. To vote, click the buttons, or:
                     <p> Swipe the picture to the Left ( &#8592; ) to vote <font color="red">NO</font> </p> <p> Swipe the picture to the Right (&#8594;) to vote <font color="green">YES</font></p></strong>
                     <br>
@@ -197,7 +216,7 @@
             handleswipe(swipedir)
             e.preventDefault()
         }, false)
-    }  
+    }
 
 window.addEventListener('load', function(){
     var el = document.getElementById('imagediv')
