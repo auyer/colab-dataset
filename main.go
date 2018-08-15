@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/auyer/colab-dataset/config"
@@ -53,6 +54,31 @@ func staticBuilder(dir string, dbpointer *badger.DB, counterdb *badger.DB) {
 			log.Println(color.Blue("[BUILDDB]") + " Inserted " + f.Name())
 		}
 	}
+}
+
+func copy(src, dst string) {
+	input, err := ioutil.ReadFile(src)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	dstsep := strings.Split(dst, "/")
+	dstsep = dstsep[:len(dstsep)-1]
+	fdst := ""
+	for _, i := range dstsep {
+		fdst = fdst + i + "/"
+	}
+	log.Println(fdst)
+	os.MkdirAll(fdst, os.ModePerm)
+	sepdst := strings.Split(src, "/")
+	sepdst = sepdst[:len(sepdst)-1]
+	err = ioutil.WriteFile(dst, input, os.ModePerm)
+	if err != nil {
+		log.Println("Error creating", dst)
+		log.Println(err)
+		return
+	}
+	return
 }
 
 func main() {
@@ -144,7 +170,16 @@ func main() {
 		}
 		return c.String(500, " ")
 	})
-
+	server.POST("/api/getnewkey/", func(c echo.Context) error {
+		var vote db.Vote
+		err := c.Bind(&vote)
+		value, err := db.GetNewSortedKey(counterdb, vote.Key)
+		if err != nil {
+			server.Logger.Info(err.Error())
+			return c.String(http.StatusNotFound, err.Error())
+		}
+		return c.String(http.StatusAccepted, value) //c.Request().Host+
+	})
 	server.GET("/api/getkey/", func(c echo.Context) error {
 		value, err := db.GetSortedKey(counterdb)
 		if err != nil {
@@ -180,6 +215,32 @@ func main() {
 		return c.JSON(http.StatusAccepted, countedList) //c.Request().Host+
 	})
 
+	server.PATCH("/api/export/:thrs", func(c echo.Context) error {
+		thrs := c.Param("thrs")
+		cut, _ := strconv.ParseFloat(thrs, 32)
+		t := time.Now()
+		timestamp := strconv.Itoa(t.Year()) + "-" + t.Month().String() + "-" + strconv.Itoa(t.Day()) + "-" + strconv.Itoa(t.Hour()) + "-" + strconv.Itoa(t.Second())
+		value, err := db.GetCurrentVotes(database)
+		if err != nil {
+			server.Logger.Info(err.Error())
+			return c.String(http.StatusNotFound, err.Error())
+		}
+		counter, err := db.GetCurrentVotes(counterdb)
+		if err != nil {
+			server.Logger.Info(err.Error())
+			return c.String(http.StatusNotFound, err.Error())
+		}
+		for index, item := range value {
+			if item.Key == counter[index].Key {
+				if float64(item.Vote) >= float64(counter[index].Vote)*cut {
+					go copy(item.Key, "./"+"export_"+timestamp+"/"+item.Key)
+				}
+			} else {
+				log.Fatal("Unmatching Database")
+			}
+		}
+		return c.String(http.StatusAccepted, "Exporting. Check server.")
+	})
 	if config.AutoTLS {
 		server.AutoTLSManager.Cache = autocert.DirCache("./cert/")
 		log.Printf("Serving Auto %s on address => %s", color.Green("HTTPS"), color.Green(config.ConfigParams.HttpsAddress))

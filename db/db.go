@@ -167,6 +167,41 @@ func GetSortedKey(dbpointer *badger.DB) (topKey string, err error) {
 	return
 }
 
+// GetNewSortedKey will return the key with the smallest value and different from the provided one
+func GetNewSortedKey(dbpointer *badger.DB, lastkey string) (topKey string, err error) {
+	rcount := rand.New(rand.NewSource(time.Now().Unix())).Intn(2)
+	var list []VoteInt
+	err = dbpointer.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchSize = 70000
+		if rcount == 1 {
+			opts.Reverse = true
+		}
+		it := txn.NewIterator(opts)
+		defer it.Close()
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			k := item.Key()
+			v, err := item.Value()
+			if err != nil {
+				return err
+			}
+			result, _ := binary.Varint(v)
+			list = append(list, VoteInt{string(k), int(result)})
+		}
+		return nil
+	})
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Vote < list[j].Vote
+	})
+	if lastkey == list[0].Key {
+		topKey = list[1].Key
+	} else {
+		topKey = list[0].Key
+	}
+	return
+}
+
 // CountDBSize will return the amount of entries in the database
 func CountDBSize(dbpointer *badger.DB) (value int) {
 	_ = dbpointer.View(func(txn *badger.Txn) error {
