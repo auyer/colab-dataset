@@ -1,11 +1,13 @@
 {
-    "Debug": "true",
-    "LogLocation": "./server.log",
-    "HttpPort": "8000",
-    "HttpsPort": "8443",
+    "Debug": "false",
+    "LogLocation": "",
+    "HttpAddress": "80",
+    "HttpsAddress": "443",
+    "AutoTLS": false,
+	"Adress":  "",
     "TLSKeyLocation": "./devssl/server.key",
     "TLSCertLocation": "./devssl/server.pem",
-    "DatabasePath" : "./fastgate.db",
-    "StaticFolder" : "./static"
+    "DatabasePath" : "./votes.db",
+    "StaticFolder" : "/static"
 
 }
