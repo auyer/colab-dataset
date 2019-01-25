@@ -20,19 +20,16 @@ func TestDatabase(t *testing.T) {
 			log.Fatal("Unable to clean Test Database Before testing. Check for permissions.")
 		}
 	}
-	err := Init(dbPath)
+	datab, err := Init(dbPath)
 	if err != nil {
 		t.Errorf("Unable to Init Database")
 	}
-	if DbPointer != GetDB() {
-		t.Errorf("Failed assigning database to Variable")
-	}
-	err = InsertResource(testKey, testValue)
+	err = InsertResource(testKey, testValue, datab)
 	if err != nil {
 		t.Errorf("Unable to Insert Tuple")
 		t.FailNow()
 	}
-	value, err := GetResourceValue(testKey)
+	value, err := GetResourceValue(testKey, datab)
 	if err != nil {
 		t.Errorf("Unable to Fetch Tuple")
 		t.FailNow()
@@ -43,12 +40,12 @@ func TestDatabase(t *testing.T) {
 		t.FailNow()
 
 	}
-	err = UpdateResource(testKey, testValue2)
+	err = UpdateResource(testKey, testValue2, datab)
 	if err != nil {
 		t.Errorf("Unable to Update Tuple")
 		t.FailNow()
 	}
-	value, err = GetResourceValue(testKey)
+	value, err = GetResourceValue(testKey, datab)
 	if err != nil {
 		t.Errorf("Unable to Fetch Tuple after Updating")
 		t.FailNow()
@@ -59,7 +56,7 @@ func TestDatabase(t *testing.T) {
 		t.FailNow()
 
 	}
-	GetDB().Close()
+	err = datab.Close()
 	if err != nil {
 		t.Errorf("Failed at Closing Database")
 		t.FailNow()

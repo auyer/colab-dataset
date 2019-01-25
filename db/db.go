@@ -96,7 +96,8 @@ func GetResourceValue(key string, dbpointer *badger.DB) (value int, err error) {
 		if err != nil {
 			return err
 		}
-		val, err := item.Value()
+		var val []byte
+		val, err = item.ValueCopy(val)
 		if err != nil {
 			return err
 		}
@@ -128,7 +129,7 @@ func GetRandomKey(dbpointer *badger.DB, dbsize int) (value string, err error) {
 				value = string(k)
 				return nil
 			} else {
-				acount += 1
+				acount++
 			}
 		}
 		return nil
@@ -151,7 +152,8 @@ func GetSortedKey(dbpointer *badger.DB) (topKey string, err error) {
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
-			v, err := item.Value()
+			var v []byte
+			v, err := item.ValueCopy(v)
 			if err != nil {
 				return err
 			}
@@ -182,7 +184,8 @@ func GetNewSortedKey(dbpointer *badger.DB, lastkey string) (topKey string, err e
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
-			v, err := item.Value()
+			var v []byte
+			v, err := item.ValueCopy(v)
 			if err != nil {
 				return err
 			}
@@ -211,7 +214,7 @@ func CountDBSize(dbpointer *badger.DB) (value int) {
 		defer it.Close()
 		for it.Rewind(); it.Valid(); it.Next() {
 			// item := it.Item()
-			value += 1
+			value++
 		}
 		return nil
 	})
@@ -229,7 +232,8 @@ func GetCurrentVotes(dbpointer *badger.DB) (list []VoteInt, err error) {
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
-			v, err := item.Value()
+			var v []byte
+			v, err := item.ValueCopy(v)
 			if err != nil {
 				return err
 			}
